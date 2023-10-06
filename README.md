@@ -62,7 +62,7 @@ Assegurar a durabilidade é responsabilidade do componente do SGBD chamado de Re
 
 ## Aplicações
 
-ADD EXEMPLOS DE APLICAÇÕES
+Explicar aplicação do banco nos celulares
 
 ## Exemplos Práticos
 
@@ -71,7 +71,7 @@ Aqui estão alguns exemplos de código SQL para demonstrar a funcionalidade de g
 #### Exemplo 1: [Nome]
 
 ```sql
-inserir código André
+--inserir código André
 
 ```
 
@@ -85,4 +85,5 @@ Esse projeto foi realizado por:
 
 ## Referências
 
-(Pegar com Lucas)
+- [Capítulo1 - Gerenciamento de Transações.md](https://github.com/aasouzaconsult/BDII/blob/main/Apostila/Cap%C3%ADtulo1%20-%20Gerenciamento%20de%20Transa%C3%A7%C3%B5es.md)
+- (Pegar com Lucas)
