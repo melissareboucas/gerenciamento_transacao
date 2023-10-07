@@ -1,0 +1,55 @@
+commit = confirmar transação
+rollback = anular transação
+
+estrutura do if/else:
+	if(true)
+	begin
+		...
+	end
+	
+	else
+	begin
+		...
+	end
+
+1° create database hotel
+
+2° criar tabelas
+   arquivos:
+	- tabelaClientes
+	- tabelaQuartos
+	- tabelaReservas
+	- tabelaTransacoes
+	- procedureParaErro
+
+3° popular clientes e quartos
+arquivos: insertClientes e insertQuartos
+
+a cada execucação uma propriedade é adicionada ao nosso cenário, ao fim de todas
+as execuções, nosso cenário vai estar completo com todas as propriedades aplicadas.
+
+antes de iniciar fazer um insert reserva e insert transacoes para testar ambas.
+arquivo: insertReserva
+
+atomicidade: todas as operações dentro da transação são executadas com sucesso ou nenhuma delas é executada.
+adicionamos o begin transaction, commit e rollback.
+cenário: insert na tabela reservas e insert na tabela transacoes em caso de erro em algum insert os dois serão cancelados. 
+arquivo: atomicidade-teste.sql
+teste: o banco deve anular o primeiro insert da transação com o Rollback porque o valor da transação não é numérico.
+
+consistencia: garante que o banco de dados permaneça em um estado coerente, preservando a validade dos dados após a conclusão da transação.
+Ter uma reserva com data de checkin após data de checkout representa uma inconsistencia. Ter duas reservas no mesmo quarto e data representa uma inconsistencia.
+adicionamos um if para verificar se as datas são consistentes e vamos adicionar um if para verificar se na data x até data y o quarto z está disponível.
+cenário: Insert na tabela reservas e rollback em caso de checkin depois de checkout ou rollback em caso de o quarto selecionado já possuir alguma reserva na mesma data
+arquivo: consistencia.sql
+teste: declarar o dia de checkin como um dia depois do checkout ou realizar duas reservas com mesma data e quarto.
+
+isolamento: previne que transações concorrentes acessem ou modifiquem os mesmos dados simultaneamente
+adicionamos SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; aos dois arquivos
+cenário: tentar gerar duas reservas para mesmo quarto e mesma data ao mesmo tempo entre dois clientes diferentes
+arquivo: isolamentoComDelay.sql e isolamentoSemDelay.sql
+teste: executar primeiro o com delay e depois o sem delay. a transação sem delay deveria terminar primeiro pois não tem delay mas
+ela vai verificar se o quarto está disponível, a transação com delay já vai ter reservado esse quarto mesmo antes de finalizar a transação.
+
+durabilidade: garante que as mudanças feitas por uma transação persistam no banco de dados, mesmo em caso de falha do sistema
+suspender o computador após a execução para simular uma queda no sistema e verificar se persistiu.
