@@ -1,4 +1,0 @@
-atomicidade: gerandoReserva insert reserva x insert pagamento
-consistencia: gerandoReserva verificação datas checkin checkout
-isolamento: gerar duas reservas para mesmo quarto
-durabilidade: após o commit o banco está salvo independente de erros no sistema
