@@ -20,7 +20,6 @@ estrutura do if/else:
 	- tabelaQuartos
 	- tabelaReservas
 	- tabelaTransacoes
-	- procedureParaErro
 
 3° popular clientes e quartos
 arquivos: insertClientes e insertQuartos
@@ -35,7 +34,7 @@ atomicidade: todas as operações dentro da transação são executadas com suce
 adicionamos o begin transaction, commit e rollback.
 cenário: insert na tabela reservas e insert na tabela transacoes em caso de erro em algum insert os dois serão cancelados. 
 arquivo: atomicidade-teste.sql
-teste: o banco deve anular o primeiro insert da transação com o Rollback porque o valor da transação não é numérico.
+teste: declarar valor da transação não numérico.
 
 consistencia: garante que o banco de dados permaneça em um estado coerente, preservando a validade dos dados após a conclusão da transação.
 Ter uma reserva com data de checkin após data de checkout representa uma inconsistencia. Ter duas reservas no mesmo quarto e data representa uma inconsistencia.
