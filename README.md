@@ -62,11 +62,104 @@ Assegurar a durabilidade é responsabilidade do componente do SGBD chamado de Re
 
 ## Aplicações
 
-Explicar aplicação do banco nos celulares
+Nesse cenário utilizaremos uma aplicação de transações em um sistema de banco de dados de um Hotel.
+
+![Diagrama](banco/database.png)
+
+As premissas são:
+- A reserva só é feita mediante confirmação do pagamento;
+- Não é possível ter uma data de checkout menor que uma data de checkin;
+- Um quarto não pode ser reservado para outro cliente em uma mesma data.
+
+Aqui as propriedades ACID do gerenciamento de transações não foram aplicadas:
+![Diagrama](banco/Reservas.png)
 
 ## Exemplos Práticos
 
-Aqui estão alguns exemplos de código SQL para demonstrar a funcionalidade de gerenciamento de transações:
+Aqui estão alguns exemplos de código SQL para demonstrar a funcionalidade de gerenciamento de transações.
+
+Antes de iniciar os exemplos, precisamos criar o banco e inserir alguns dados.
+
+```sql
+--Criar banco
+create database hotel;
+
+--Criar tabelas
+CREATE TABLE Clientes (
+    ClienteID INT IDENTITY(1,1) PRIMARY KEY,
+    Nome VARCHAR(100),
+    Email VARCHAR(100)
+);
+
+CREATE TABLE Quartos (
+    QuartoID INT IDENTITY(1,1) PRIMARY KEY,
+    Preco DECIMAL(10, 2)
+);
+
+CREATE TABLE Reservas (
+    ReservaID INT IDENTITY(1,1) PRIMARY KEY,
+    ClienteID INT,
+    QuartoID INT,
+    DataCheckin DATE,
+    DataCheckout DATE,
+    PagamentoConfirmado BIT,
+	FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID),
+	FOREIGN KEY (QuartoID) REFERENCES Quartos(QuartoID),
+);
+
+CREATE TABLE TransacoesDePagamento (
+    TransacaoID INT IDENTITY(1,1) PRIMARY KEY,
+    ReservaID INT,
+    Valor DECIMAL(10, 2),
+    DataTransacao DATETIME,
+    FOREIGN KEY (ReservaID) REFERENCES Reservas(ReservaID),
+	CONSTRAINT CK_Valor CHECK (ISNUMERIC(Valor) = 1) 
+);
+
+--Inserir valores nas tabelas
+insert into Clientes
+values ('Andre', 'andre@email.com');
+
+insert into Clientes
+values ('Maria', 'maria@email.com');
+
+insert into Clientes
+values ('João', 'joao@email.com');
+
+insert into Quartos
+values (100);
+
+insert into Quartos
+values (200);
+
+insert into Quartos
+values (500);
+
+DECLARE @NumeroQuarto int;
+DECLARE @DataCheckin DATE;
+DECLARE @DataCheckout DATE;
+DECLARE @UltimaReserva int;
+DECLARE @ClienteID int;
+DECLARE @ValorQuarto decimal(10,2);
+
+SET @NumeroQuarto = 1;
+SET @DataCheckin = '2021-10-15';
+SET @DataCheckout = '2021-10-25';
+SET @ClienteID = 3;
+
+INSERT INTO Reservas (ClienteID, QuartoID, DataCheckin, DataCheckout, PagamentoConfirmado)
+VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
+
+SET @UltimaReserva = SCOPE_IDENTITY();
+SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
+PRINT @ValorQuarto;
+INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
+VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
+
+UPDATE Reservas SET PagamentoConfirmado = 1
+WHERE ReservaID = @UltimaReserva;
+
+```
 
 #### Exemplo 1: Propriedade da atomicidade
 
@@ -308,4 +401,3 @@ Esse projeto foi realizado por:
 ## Referências
 
 - [Capítulo1 - Gerenciamento de Transações.md](https://github.com/aasouzaconsult/BDII/blob/main/Apostila/Cap%C3%ADtulo1%20-%20Gerenciamento%20de%20Transa%C3%A7%C3%B5es.md)
-- (Pegar com Lucas)
