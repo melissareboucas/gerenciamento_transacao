@@ -68,12 +68,234 @@ Explicar aplicação do banco nos celulares
 
 Aqui estão alguns exemplos de código SQL para demonstrar a funcionalidade de gerenciamento de transações:
 
-#### Exemplo 1: [Nome]
+#### Exemplo 1: Propriedade da atomicidade
 
 ```sql
---inserir código André
+DECLARE @NumeroQuarto int;
+DECLARE @DataCheckin DATE;
+DECLARE @DataCheckout DATE;
+DECLARE @UltimaReserva int;
+DECLARE @ClienteID int;
+DECLARE @ValorQuarto decimal(10,2);
+
+SET @NumeroQuarto = 3;
+SET @DataCheckin = '2023-10-15';
+SET @DataCheckout = '2023-10-25';
+SET @ClienteID = 2;
+
+BEGIN TRANSACTION;
+
+BEGIN TRY
+
+	INSERT INTO Reservas (ClienteID, QuartoID, DataCheckin, DataCheckout, PagamentoConfirmado)
+	VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
+		
+	-- Agora deveriamos realizar o pagamento, mas vamos simular um erro no pagamento com valor 'abc'
+	SET @UltimaReserva = SCOPE_IDENTITY();
+	SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
+
+	INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
+	VALUES (@UltimaReserva, 'abc', GETDATE());
+
+	UPDATE Reservas SET PagamentoConfirmado = 1
+	WHERE ReservaID = @UltimaReserva;
+	
+	COMMIT;
+	
+END TRY
+	
+BEGIN CATCH
+
+	PRINT ERROR_MESSAGE();
+	PRINT 'Reserva cancelada por falta de pagamento';
+	ROLLBACK;
+
+END CATCH;
 
 ```
+
+#### Exemplo 2: Propriedade da consistência
+
+```sql
+DECLARE @NumeroQuarto int;
+DECLARE @DataCheckin DATE;
+DECLARE @DataCheckout DATE;
+DECLARE @UltimaReserva int;
+DECLARE @ClienteID int;
+DECLARE @ValorQuarto decimal(10,2);
+
+SET @NumeroQuarto = 3;
+SET @DataCheckin = '2023-11-18';
+SET @DataCheckout = '2023-11-15';
+SET @ClienteID = 1;
+
+BEGIN TRANSACTION;
+
+IF NOT EXISTS (
+	SELECT ReservaID FROM Reservas 
+	WHERE QuartoID = @NumeroQuarto
+	AND DataCheckin <= @DataCheckout
+	AND DataCheckout >= @DataCheckin)
+
+	BEGIN
+	
+	INSERT INTO Reservas (ClienteID, QuartoID, DataCheckin, DataCheckout, PagamentoConfirmado)
+	VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
+
+	IF (@DataCheckout < @DataCheckin)
+	BEGIN
+		PRINT 'Seu checkin não pode ser após o checkout';
+		ROLLBACK;
+	END
+
+	ELSE
+	BEGIN
+		SET @UltimaReserva = SCOPE_IDENTITY();
+		SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
+
+		INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
+		VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
+
+		UPDATE Reservas SET PagamentoConfirmado = 1
+		WHERE ReservaID = @UltimaReserva;
+	
+		COMMIT;
+	END
+
+	
+END
+
+ELSE
+BEGIN
+	PRINT 'Quarto não está disponível para a data selecionada';
+	ROLLBACK;
+
+END;
+
+```
+
+#### Exemplo 3: Propriedade do isolamento
+
+```sql
+-- Primeira janela
+DECLARE @NumeroQuarto int;
+DECLARE @DataCheckin DATE;
+DECLARE @DataCheckout DATE;
+DECLARE @UltimaReserva int;
+DECLARE @ClienteID int;
+DECLARE @ValorQuarto decimal(10,2);
+
+SET @NumeroQuarto = 2;
+SET @DataCheckin = '2021-10-15';
+SET @DataCheckout = '2021-10-25';
+SET @ClienteID = 1;
+
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+BEGIN TRANSACTION;
+
+IF NOT EXISTS (
+	SELECT ReservaID FROM Reservas 
+	WHERE QuartoID = @NumeroQuarto
+	AND DataCheckin <= @DataCheckout
+	AND DataCheckout >= @DataCheckin)
+
+	BEGIN
+
+
+	INSERT INTO Reservas (ClienteID, QuartoID, DataCheckin, DataCheckout, PagamentoConfirmado)
+	VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
+
+	WAITFOR DELAY '00:00:05';
+	IF (@DataCheckout < @DataCheckin)
+	BEGIN
+		PRINT 'Seu checkin não pode ser após o checkout';
+		ROLLBACK;
+	END
+
+	ELSE
+	BEGIN
+
+		SET @UltimaReserva = SCOPE_IDENTITY();
+		SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
+
+		INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
+		VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
+
+		UPDATE Reservas SET PagamentoConfirmado = 1
+		WHERE ReservaID = @UltimaReserva;
+	
+		COMMIT;
+	END;
+END
+
+ELSE
+BEGIN
+	PRINT 'Quarto não está disponível para a data selecionada';
+	ROLLBACK;
+
+END;
+
+--Segunda Janela
+DECLARE @NumeroQuarto int;
+DECLARE @DataCheckin DATE;
+DECLARE @DataCheckout DATE;
+DECLARE @UltimaReserva int;
+DECLARE @ClienteID int;
+DECLARE @ValorQuarto decimal(10,2);
+
+SET @NumeroQuarto = 2;
+SET @DataCheckin = '2021-10-15';
+SET @DataCheckout = '2021-10-25';
+SET @ClienteID = 2;
+
+SET TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+
+BEGIN TRANSACTION;
+
+IF NOT EXISTS (
+	SELECT ReservaID FROM Reservas 
+	WHERE QuartoID = @NumeroQuarto
+	AND DataCheckin <= @DataCheckout
+	AND DataCheckout >= @DataCheckin)
+
+	BEGIN
+	
+	INSERT INTO Reservas (ClienteID, QuartoID, DataCheckin, DataCheckout, PagamentoConfirmado)
+	VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
+
+	IF (@DataCheckout < @DataCheckin)
+	BEGIN
+		PRINT 'Seu checkin não pode ser após o checkout';
+		ROLLBACK;
+	END
+
+	ELSE
+	BEGIN
+
+		SET @UltimaReserva = SCOPE_IDENTITY();
+		SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
+
+		INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
+		VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
+
+		UPDATE Reservas SET PagamentoConfirmado = 1
+		WHERE ReservaID = @UltimaReserva;
+	
+		COMMIT;
+	END;
+END
+
+ELSE
+BEGIN
+	PRINT 'Quarto não está disponível para a data selecionada';
+	ROLLBACK;
+
+END;
+
+
+```
+
 
 ## Contribuição
 
