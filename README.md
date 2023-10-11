@@ -40,17 +40,17 @@ Transações são operações executadas sobre os dados do banco de dados que de
 
 A propriedade de atomicidade garante que uma transação seja tratada como uma unidade indivisível de trabalho. Isso significa que todas as operações dentro da transação são realizadas com sucesso ou nenhuma delas é realizada. 
 
-Assegurar a Atomicidade de uma transação e responsabilidade do SGBD, mas especificamente dos componentes de Gerenciamento de Transações e de Recuperação de falhas.
+Assegurar a Atomicidade de uma transação é responsabilidade do SGBD, mais especificamente dos componentes de Gerenciamento de Transações e de Recuperação de falhas.
 
 #### Consistência
 
 A propriedade de consistência de que uma transação leva o banco de dados de um estado válido para outro. Isso implica que as operações realizadas em uma transação não violam as regras e restrições definidas no esquema do banco de dados.
 
-Assegurar a Consistência de uma transação e responsabilidade do progamador.
+Assegurar a Consistência de uma transação é responsabilidade do programador.
 
 #### Isolamento
 
-Uma transação é invisível para outras transação até que a transação seja concluída. Isso evita que transações concorrentes acessem ou modifiquem os mesmos dados simultaneamente.
+Uma transação é invisível para outra transação até que a transação seja concluída. Isso evita que transações concorrentes acessem ou modifiquem os mesmos dados simultaneamente.
 
 Assegurar o isolamento é responsabilidade do Controle de Concorrência.
 
@@ -68,7 +68,7 @@ Nesse cenário utilizaremos uma aplicação de transações em um sistema de ban
 
 As premissas são:
 - A reserva só é feita mediante confirmação do pagamento;
-- Não é possível ter uma data de checkout menor que uma data de checkin;
+- Não é possível ter uma data de checkout antes de uma data de checkin;
 - Um quarto não pode ser reservado para outro cliente em uma mesma data.
 
 Aqui as propriedades ACID do gerenciamento de transações não foram aplicadas:
