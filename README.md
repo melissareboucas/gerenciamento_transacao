@@ -168,7 +168,7 @@ VALUES (@ClienteID, @NumeroQuarto, @DataCheckin, @DataCheckout, 0);
 
 SET @UltimaReserva = SCOPE_IDENTITY();
 SET @ValorQuarto = (select Preco from Quartos where QuartoID = @NumeroQuarto);
-PRINT @ValorQuarto;
+
 INSERT INTO TransacoesDePagamento (ReservaID, Valor, DataTransacao)
 VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
 
