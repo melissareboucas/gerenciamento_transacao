@@ -91,10 +91,14 @@ CREATE TABLE Clientes (
     Email VARCHAR(100)
 );
 
+Select * from Clientes
+
 CREATE TABLE Quartos (
     QuartoID INT IDENTITY(1,1) PRIMARY KEY,
     Preco DECIMAL(10, 2)
 );
+
+Select * from Quartos
 
 CREATE TABLE Reservas (
     ReservaID INT IDENTITY(1,1) PRIMARY KEY,
@@ -107,6 +111,8 @@ CREATE TABLE Reservas (
 	FOREIGN KEY (QuartoID) REFERENCES Quartos(QuartoID),
 );
 
+Select * from Reservas
+
 CREATE TABLE TransacoesDePagamento (
     TransacaoID INT IDENTITY(1,1) PRIMARY KEY,
     ReservaID INT,
@@ -115,6 +121,8 @@ CREATE TABLE TransacoesDePagamento (
     FOREIGN KEY (ReservaID) REFERENCES Reservas(ReservaID),
 	CONSTRAINT CK_Valor CHECK (ISNUMERIC(Valor) = 1) 
 );
+
+Select * from TransacoesDePagamento
 
 --Inserir valores nas tabelas
 insert into Clientes
@@ -126,6 +134,8 @@ values ('Maria', 'maria@email.com');
 insert into Clientes
 values ('João', 'joao@email.com');
 
+Select * from Clientes
+
 insert into Quartos
 values (100);
 
@@ -134,6 +144,8 @@ values (200);
 
 insert into Quartos
 values (500);
+
+Select * from Quartos
 
 DECLARE @NumeroQuarto int;
 DECLARE @DataCheckin DATE;
@@ -158,6 +170,9 @@ VALUES (@UltimaReserva, @ValorQuarto, GETDATE());
 
 UPDATE Reservas SET PagamentoConfirmado = 1
 WHERE ReservaID = @UltimaReserva;
+
+Select * from TransacoesDePagamento
+Select * from Reservas
 
 ```
 
@@ -204,6 +219,8 @@ BEGIN CATCH
 	ROLLBACK;
 
 END CATCH;
+
+Select * from Reservas
 
 ```
 
