@@ -85,6 +85,7 @@ Antes de iniciar os exemplos, precisamos criar o banco e inserir alguns dados.
 create database hotel;
 
 --Criar tabelas
+USE hotel;
 CREATE TABLE Clientes (
     ClienteID INT IDENTITY(1,1) PRIMARY KEY,
     Nome VARCHAR(100),
@@ -93,6 +94,7 @@ CREATE TABLE Clientes (
 
 Select * from Clientes
 
+USE hotel;
 CREATE TABLE Quartos (
     QuartoID INT IDENTITY(1,1) PRIMARY KEY,
     Preco DECIMAL(10, 2)
@@ -100,6 +102,7 @@ CREATE TABLE Quartos (
 
 Select * from Quartos
 
+USE hotel;
 CREATE TABLE Reservas (
     ReservaID INT IDENTITY(1,1) PRIMARY KEY,
     ClienteID INT,
@@ -113,6 +116,7 @@ CREATE TABLE Reservas (
 
 Select * from Reservas
 
+USE hotel;
 CREATE TABLE TransacoesDePagamento (
     TransacaoID INT IDENTITY(1,1) PRIMARY KEY,
     ReservaID INT,
